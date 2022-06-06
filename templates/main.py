@@ -25,7 +25,7 @@ sanic_app = PYRSanicAppBuilder.build(config, service)
 
 @sanic_app.listener('before_server_start')
 def init(app, loop):
-    mongo_db_instance = AsyncIOMotorClient("mongodb://localhost:27017/db")
+    mongo_db_instance = AsyncIOMotorClient("mongodb://mongo:27017/db")
     db = mongo_db_instance.get_default_database()
     repo.set_db_connection(db)
 

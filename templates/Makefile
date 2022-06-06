@@ -1,5 +1,2 @@
-setup:
-	pip install -r requirements.txt
-
 run:
-	python main.py
+	docker-compose -d --build up
