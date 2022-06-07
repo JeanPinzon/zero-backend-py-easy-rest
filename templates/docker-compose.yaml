@@ -16,11 +16,11 @@ services:
   rest-api:
     build: .
     image: rest-api
-    environment:
+    environment: <% if and (eq (index .Params `database`) "none") (eq (index .Params `cacheStore`) "none") -%>[]<%- end %>
       <% if eq (index .Params `database`) "mongo" -%>- MONGO_CONNECTION_STRING=mongodb://mongo:27017/db<%- end %>
       <% if eq (index .Params `cacheStore`) "redis" -%>- REDIS_CONNECTION_STRING=redis://redis<%- end %>
     ports:
       - "8000:8000"
-    depends_on:
+    depends_on: <% if and (eq (index .Params `database`) "none") (eq (index .Params `cacheStore`) "none") -%>[]<%- end %>
       <% if eq (index .Params `database`) "mongo" -%>- mongo<%- end %>
       <% if eq (index .Params `cacheStore`) "redis" -%>- redis<%- end %>

@@ -1,11 +1,9 @@
-<% if eq (index .Params `database`) "mongo" || eq (index .Params `cacheStore`) "redis" -%>
+<% if or (eq (index .Params `database`) "mongo") (eq (index .Params `cacheStore`) "redis") -%>
 import os
 <%- end %>
-
 <% if eq (index .Params `database`) "mongo" -%>
 from motor.motor_asyncio import AsyncIOMotorClient
 <%- end %>
-
 from py_easy_rest import PYRSanicAppBuilder
 from py_easy_rest.service import PYRService
 <% if eq (index .Params `database`) "mongo" -%>
