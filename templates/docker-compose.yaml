@@ -1,15 +1,23 @@
 version: '3'
 
 services:
+<% if eq (index .Params `database`) "mongo" %>
   mongo:
     image: mongo
     ports:
       - "27017:27017"
-
+<% end %>
+<% if eq (index .Params `cacheStore`) "redis" %>
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+<% end %>
   rest-api:
     build: .
     image: rest-api
     ports:
       - "8000:8000"
     depends_on:
-      - mongo
+      <% if eq (index .Params `database`) "mongo" -%>- mongo<%- end %>
+      <% if eq (index .Params `cacheStore`) "redis" -%>- redis<%- end %>

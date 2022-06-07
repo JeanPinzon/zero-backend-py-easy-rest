@@ -1,4 +1,10 @@
 py-easy-rest==0.4.5
+<% if eq (index .Params `database`) "mongo" -%>
 py-easy-rest-mongo-motor-repo==0.1.5
+<%- end %>
+<% if eq (index .Params `cacheStore`) "memory" -%>
 py-easy-rest-memory-cache==0.1.2
+<%- end %>
+<% if eq (index .Params `cacheStore`) "redis" -%>
 py-easy-rest-redis-cache==0.1.3
+<%- end %>
