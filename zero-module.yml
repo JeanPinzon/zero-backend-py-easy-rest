@@ -12,32 +12,18 @@ template:
     - '<%'
     - '%>'
   inputDir: 'templates'
-  outputDir: 'backend-service'
+  outputDir: 'metadata-api'
 
 parameters:
   - field: database
     label: Database engine to use
     options:
+      "none": "None"
       "mongo": "Mongo DB"
 
   - field: cacheStore
     label: "Cache store to use"
     options:
-      "none": "none"
+      "none": "None"
       "memory": "In Memory"
       "redis": "Redis"
-  
-  - field: CIVendor
-    label: Which CI vendor would you like to use?
-    info: "Build pipelines will be set up which will deploy your code to your infrastructure whenever PRs are merged to the main branch."
-    default: "circleci"
-    options:
-      "github-actions": "Github Actions"
-
-
-conditions:
-  - action: ignoreFile
-    matchField: CIVendor
-    whenValue: "circleci"
-    data:
-    - .github/

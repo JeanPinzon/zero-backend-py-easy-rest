@@ -1,3 +1,7 @@
+<% if eq (index .Params `database`) "mongo" || eq (index .Params `cacheStore`) "redis" -%>
+import os
+<%- end %>
+
 <% if eq (index .Params `database`) "mongo" -%>
 from motor.motor_asyncio import AsyncIOMotorClient
 <%- end %>
@@ -52,7 +56,7 @@ config = {
 <% if eq (index .Params `database`) "mongo" -%>
 repo = PYRMongoRepo()
 <% if eq (index .Params `cacheStore`) "redis" -%>
-cache = PYRRedisCache("redis://redis")
+cache = PYRRedisCache(os.environ["REDIS_CONNECTION_STRING"])
 service = PYRService(config, repo=repo, cache=cache)
 <% else if eq (index .Params `cacheStore`) "memory" -%>
 cache = PYRMemoryCache()
@@ -62,7 +66,7 @@ service = PYRService(config, repo=repo)
 <%- end %>
 <% else -%>
 <% if eq (index .Params `cacheStore`) "redis" -%>
-cache = PYRRedisCache("redis://redis")
+cache = PYRRedisCache(os.environ["REDIS_CONNECTION_STRING"])
 service = PYRService(config, cache=cache)
 <% else if eq (index .Params `cacheStore`) "memory" -%>
 cache = PYRMemoryCache()
@@ -76,7 +80,7 @@ sanic_app = PYRSanicAppBuilder.build(config, service)
 <% if eq (index .Params `database`) "mongo" -%>
 @sanic_app.listener('before_server_start')
 def init(app, loop):
-    mongo_db_instance = AsyncIOMotorClient("mongodb://mongo:27017/db")
+    mongo_db_instance = AsyncIOMotorClient(os.environ["MONGO_CONNECTION_STRING"])
     db = mongo_db_instance.get_default_database()
     repo.set_db_connection(db)
 <%- end %>

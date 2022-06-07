@@ -1,2 +1,2 @@
 run:
-	docker-compose -d --build up
+	docker-compose up --build

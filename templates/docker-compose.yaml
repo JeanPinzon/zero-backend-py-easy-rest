@@ -16,6 +16,9 @@ services:
   rest-api:
     build: .
     image: rest-api
+    environment:
+      <% if eq (index .Params `database`) "mongo" -%>- MONGO_CONNECTION_STRING=mongodb://mongo:27017/db<%- end %>
+      <% if eq (index .Params `cacheStore`) "redis" -%>- REDIS_CONNECTION_STRING=redis://redis<%- end %>
     ports:
       - "8000:8000"
     depends_on:
