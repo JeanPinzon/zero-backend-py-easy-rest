@@ -19,19 +19,6 @@ parameters:
     label: Database engine to use
     options:
       "mongo": "Mongo DB"
-  
-  - field: mongoDatabaseName
-    label: Mongo Database Name
-    conditions:
-    - action: KeyMatchCondition
-      whenValue: "mongo"
-      matchField: database
-  - field: mongoDatabasePassword
-    label: Mongo Database Password
-    conditions:
-    - action: KeyMatchCondition
-      whenValue: "mongo"
-      matchField: database
 
   - field: cacheStore
     label: "Cache store to use"
@@ -39,19 +26,6 @@ parameters:
       "none": "none"
       "memory": "In Memory"
       "redis": "Redis"
-  
-  - field: redisDatabaseName
-    label: Redis Database Name
-    conditions:
-    - action: KeyMatchCondition
-      whenValue: "redis"
-      matchField: cacheStore
-  - field: redisDatabasePassword
-    label: Redis Database Password
-    conditions:
-    - action: KeyMatchCondition
-      whenValue: "redis"
-      matchField: cacheStore
   
   - field: CIVendor
     label: Which CI vendor would you like to use?

@@ -39,7 +39,7 @@ config = {
             "name": {"type": "string"},
         },
         "required": ["name"],
-    }, , {
+    }, {
         "name": "Technical Skills",
         "slug": "tech-skills",
         "properties": {
