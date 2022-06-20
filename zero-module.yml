@@ -15,19 +15,118 @@ template:
   outputDir: 'metadata-api'
 
 parameters:
+  - field: backendApplicationHosting
+    label: How do you want to host the backend of your application?
+    info: "Kubernetes is more complex and expensive, but significantly more feature-rich. The serverless approach can be cheaper but is limited in tooling.\nWe recommend Kubernetes for all but the most simple applications. See why: https://whyk8s.getzero.dev"
+    default: "kubernetes"
+    options:
+      "kubernetes": "Kubernetes using AWS EKS"
+      "serverless": "(BETA) Serverless using AWS SAM/Lambda"
+  - field: useExistingAwsProfile
+    label: "Use credentials from an existing AWS profile?"
+    info: "You can choose either a currently existing profile if you've already configured your AWS CLI, or manually enter a pair of AWS access keys."
+    options:
+      "yes": "Yes"
+      "no": "No"
+    omitFromProjectFile: yes
+  - field: profilePicker
+    omitFromProjectFile: yes
+    type: AWSProfilePicker
+    conditions:
+    - action: KeyMatchCondition
+      whenValue: "yes"
+      matchField: useExistingAwsProfile
+  - field: accessKeyId
+    label: AWS AccessKeyId
+    info: "AWS access is controlled by a pair of keys tied to a user account.\nhttps://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html "
+    envVarName: "AWS_ACCESS_KEY_ID"
+    conditions:
+    - action: KeyMatchCondition
+      whenValue: "no"
+      matchField: useExistingAwsProfile
+  - field: secretAccessKey
+    envVarName: "AWS_SECRET_ACCESS_KEY"
+    label: AWS SecretAccessKey
+    info: "AWS access is controlled by a pair of keys tied to a user account.\nhttps://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html "
+    conditions:
+    - action: KeyMatchCondition
+      whenValue: "no"
+      matchField: useExistingAwsProfile
+  - field: region
+    label: Select AWS Region
+    info: "This is the region your resources will be created in.\nMost regions have all the same features and functionality, but depending on your product you may need to choose a different region for data sovereignty reasons."
+    options:
+      "us-east-1": "us-east-1 - US East (N. Virginia)"
+      "us-east-2": "us-east-2 - US East (Ohio)"
+      "us-west-2": "us-west-2 - US West (Oregon)"
+      "ca-central-1": "ca-central-1 - Canada (Central)"
+      "eu-west-1": "eu-west-1 - Europe (Ireland)"
+      "ap-southeast-1": "ap-southeast-1 - Asia Pacific (Singapore)"
+  - field: productionHostRoot
+    label: Production Root Host Name (e.g. mydomain.com)
+    info: "This must be the root of the chosen domain, not a subdomain. You will also be prompted for the subdomains to use for your application."
+    fieldValidation:
+      type: regex
+      value: '^([a-z0-9]+(-[a-z0-9]+)*\.{1})+[a-z]{2,}$'
+      errorMessage: Invalid root domain name
+  - field: productionFrontendSubdomain
+    label: Production Frontend Host Name (e.g. app.)
+    info: "The subdomain that will point to the static assets of your frontend hosted in Cloudfront."
+    default: app.
+    fieldValidation:
+      type: regex
+      value: '^([a-z0-9]+(-[a-z0-9]+)*\.)$'
+      errorMessage: Invalid subdomain (cannot contain special chars & must end with a '.')
+  - field: productionBackendSubdomain
+    label: Production Backend Host Name (e.g. api.)
+    info: "The subdomain that will point to the API of your backend running in Kubernetes."
+    default: api.
+    fieldValidation:
+      type: regex
+      value: '^([a-z0-9]+(-[a-z0-9]+)*\.)$'
+      errorMessage: Invalid subdomain (cannot contain special chars & must end with a '.')
+  - field: stagingHostRoot
+    label: Staging Root Host Name (e.g. mydomain-staging.com)
+    info: "This must be the root of the chosen domain, not a subdomain. You will also be prompted for the subdomains to use for your application.\nIt's recommended that you use different hostnames for staging and production instead of trying to have staging as a subdomain of your production domain."
+    fieldValidation:
+      type: regex
+      value: '^([a-z0-9]+(-[a-z0-9]+)*\.{1})+[a-z]{2,}$'
+      errorMessage: Invalid root domain name
+  - field: stagingFrontendSubdomain
+    label: Staging Frontend Host Name (e.g. app.)
+    info: "The subdomain that will point to the static assets of your frontend hosted in Cloudfront."
+    default: app.
+    fieldValidation:
+      type: regex
+      value: '^([a-z0-9]+(-[a-z0-9]+)*\.)$'
+      errorMessage: Invalid subdomain (cannot contain special chars & must end with a '.')
+  - field: stagingBackendSubdomain
+    label: Staging Backend Host Name (e.g. api.)
+    info: "The subdomain that will point to the API of your backend running in Kubernetes."
+    default: api.
+    fieldValidation:
+      type: regex
+      value: '^([a-z0-9]+(-[a-z0-9]+)*\.)$'
+      errorMessage: Invalid subdomain (cannot contain special chars & must end with a '.')
+  - field: accountId
+    label: AWS Account ID
+    execute: aws sts get-caller-identity --query "Account" | tr -d '"'
+  - field: randomSeed
+    label: Random seed that will be shared between projects to come up with deterministic resource names
+    execute: uuidgen | head -c 8
+  - field: databaseName
+    execute: echo "$projectName"| sed "s/[- ]//g"
   - field: database
     label: Database engine to use
     options:
       "none": "None"
       "mongo": "Mongo DB"
-
   - field: cacheStore
     label: "Cache store to use"
     options:
       "none": "None"
       "memory": "In Memory"
       "redis": "Redis"
-
   - field: CIVendor
     label: Which CI vendor would you like to use?
     info: "Build pipelines will be set up which will deploy your code to your infrastructure whenever PRs are merged to the main branch."
