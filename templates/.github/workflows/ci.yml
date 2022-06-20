@@ -1,0 +1,82 @@
+name: CI Pipeline
+on:
+  push:
+    branches: [master, main]
+env:
+  # Environment variables shared across jobs and doesn't change per environment
+  region: <% index .Params `region` %>
+  accountId: "<% index .Params `accountId` %>"
+  repo: <% .Name %>
+  namespace: <% .Name %>
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set IMAGE_TAG as env
+        run: |
+          IMAGE_TAG=$(git rev-parse --short=7 ${{ github.sha }})
+          echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+      - if: env.AWS_ACCESS_KEY_ID == null
+        run: |
+          echo "AWS Credentials not found, This is expected for the first run as the repo is provisioned then secrets are injected at a later step."
+          exit 1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.region }}
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ${{ env.accountId }}.dkr.ecr.${{ env.region }}.amazonaws.com/${{ env.repo }}:${{ env.IMAGE_TAG }}
+
+  staging-deploy:
+      needs: build
+      runs-on: ubuntu-latest
+      env:
+        environment-overlay: staging
+        cluster-name: "<% .Name %>-stage-<% index .Params `region` %>"
+        cluster-authentication-role-arn: "arn:aws:iam::<% index .Params `accountId` %>:role/<% .Name %>-kubernetes-deployer-stage"
+      steps:
+        - uses: actions/checkout@v2
+        - name: Set IMAGE_TAG as env
+          run: |
+            IMAGE_TAG=$(git rev-parse --short=7 ${{ github.sha }})
+            echo "IMAGE_TAG=${IMAGE_TAG}" >> $GITHUB_ENV
+        - name: Install kubectl
+          uses: azure/setup-kubectl@v1
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v1
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{ env.region }}
+        - name: Setup binaries(aws-cli/kustomize/iam-authenticator)
+          uses: ./.github/actions/setup-aws-kustomize
+          with:
+            cluster-authentication-role-arn: ${{ env.cluster-authentication-role-arn }}
+            cluster-name: ${{ env.cluster-name }}
+            region: ${{ env.region }}
+        - name: Check Namespace
+          run: |
+            DEPLOYMENT=${{ env.repo }}
+            NAMESPACE=${{ env.namespace }}
+            kubectl create namespace $NAMESPACE || echo "Namespace already exists"
+        - name: Deploy image
+          uses: ./.github/actions/deploy
+          with:
+            namespace: ${{ env.namespace }}
+            repository-name: ${{ env.repo }}
+            image-tag: ${{ env.IMAGE_TAG }}
+            docker-host: ${{ env.accountId }}.dkr.ecr.${{ env.region }}.amazonaws.com
+            region: ${{ env.region }}
+            environment-overlay: ${{ env.environment-overlay }}

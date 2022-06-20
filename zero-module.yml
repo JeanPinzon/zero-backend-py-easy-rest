@@ -27,3 +27,18 @@ parameters:
       "none": "None"
       "memory": "In Memory"
       "redis": "Redis"
+
+  - field: CIVendor
+    label: Which CI vendor would you like to use?
+    info: "Build pipelines will be set up which will deploy your code to your infrastructure whenever PRs are merged to the main branch."
+    default: "github-actions"
+    options:
+      "github-actions": "Github Actions"
+      "none": "None"
+
+conditions:
+  - action: ignoreFile
+    matchField: CIVendor
+    whenValue: "none"
+    data:
+    - .github/
