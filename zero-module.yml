@@ -6,6 +6,9 @@ zeroVersion: '>= 0.2.1'
 commands:
   check: sh scripts/check.sh
 
+dependsOn:
+- zero-aws-eks-simple-stack
+
 template:
   strictMode: true
   delimiters:
