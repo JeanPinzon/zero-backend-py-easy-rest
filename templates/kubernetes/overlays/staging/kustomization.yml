@@ -3,17 +3,11 @@ kind: Kustomization
 
 patchesStrategicMerge:
 - deployment.yml
+
 resources:
 - ../../base
-- external-secret.yml
-- ingress.yml
 
 configMapGenerator:
 - name: <% .Name %>-config
   behavior: merge
-  literals:
-    - ENVIRONMENT=staging
-    - DOMAIN=<% index .Params `stagingHostRoot` %>
-    - BACKEND_URL=https://<% index .Params `stagingBackendSubdomain` %><% index .Params `stagingHostRoot` %>
-    - FRONTEND_URL=https://<% index .Params `stagingFrontendSubdomain` %><% index .Params `stagingHostRoot` %>
-    - S3_BUCKET=files.<% index .Params `stagingHostRoot` %>
+  literals: []

@@ -4,6 +4,7 @@ import os
 <% if eq (index .Params `database`) "mongo" -%>
 from motor.motor_asyncio import AsyncIOMotorClient
 <%- end %>
+from sanic_ext import Extend
 from py_easy_rest import PYRSanicAppBuilder
 from py_easy_rest.service import PYRService
 <% if eq (index .Params `database`) "mongo" -%>
@@ -82,6 +83,12 @@ def init(app, loop):
     db = mongo_db_instance.get_default_database()
     repo.set_db_connection(db)
 <%- end %>
+
+sanic_app.config.update({
+    "CORS_ORIGINS": "*"
+})
+
+Extend(sanic_app)
 
 sanic_app.run(
     host='0.0.0.0',

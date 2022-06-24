@@ -9,8 +9,16 @@ spec:
         - name: <% .Name %>
           resources:
             requests:
-              memory: 128Mi
-              cpu: 0.1
+              memory: 64Mi
+              cpu: 0.2
             limits:
-              memory: 512Mi
-              cpu: 1.0
+              memory: 128Mi
+              cpu: 0.6
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: <% .Name %>
+spec:
+  maxReplicas: 3
+  minReplicas: 1

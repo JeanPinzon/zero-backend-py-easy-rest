@@ -3,35 +3,26 @@ kind: Deployment
 metadata:
   name: <% .Name %>
 spec:
-  revisionHistoryLimit: 5
+  replicas: 1
   selector:
     matchLabels:
       app: <% .Name %>
   template:
     spec:
-      serviceAccountName: backend-service
-      automountServiceAccountToken: true
       containers:
         - name: <% .Name %>
           image: fake-image
           resources:
             requests:
-              memory: 64Mi
+              memory: 4Mi
               cpu: 0.1
             limits:
-              memory: 256Mi
-              cpu: 0.5
-          ports:
-            - containerPort: 80
-              name: http
+              memory: 8Mi
+              cpu: 0.4
           envFrom:
           - configMapRef:
               name: <% .Name %>-config
-          - secretRef:
-              name: <% .Name %>
           env:
-          - name: SERVER_PORT
-            value: "80"
           - name: POD_NAME
             valueFrom:
               fieldRef:

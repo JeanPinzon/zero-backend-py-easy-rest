@@ -3,24 +3,14 @@ kind: Kustomization
 
 resources:
 - deployment.yml
-- service.yml
-- cronjob.yml
-<%if eq (index .Params `userAuth`) "yes" %>- auth.yml
-<% end %>
+- private-lb.yml
+- public-lb.yml
+
 
 configMapGenerator:
 - name: <% .Name %>-config
-  literals:
-    - DATABASE_ENGINE=<% index .Params `database` %>
-    - DATABASE_HOST=database.<% .Name %>
-    - DATABASE_PORT=<%if eq (index .Params `database`) "postgres" %>5432<% else if eq (index .Params `database`) "mysql" %>3306<% end %>
-    - DATABASE_NAME=<% index .Params `databaseName` %>
-    - SERVICE_PORT=80
-    - AWS_REGION=<% index .Params `region` %>
-<%if ne (index .Params `cacheStore`) "none" %>    - CACHE_ENGINE=<% index .Params `cacheStore` %>
-    - CACHE_ENDPOINT=cache-<% index .Params `cacheStore` %>.<% .Name %>
-    - CACHE_PORT=<%if eq (index .Params `cacheStore`) "redis" %>6379<% else if eq (index .Params `cacheStore`) "memcached" %>11211<% end %>
-<% end %>
+  literals: []
+
 
 commonLabels:
   app: <% .Name %>

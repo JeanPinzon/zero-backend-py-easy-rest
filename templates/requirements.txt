@@ -1,4 +1,4 @@
-py-easy-rest==0.4.5
+py-easy-rest==0.4.7
 <% if eq (index .Params `database`) "mongo" -%>
 py-easy-rest-mongo-motor-repo==0.1.5
 <%- end %>
