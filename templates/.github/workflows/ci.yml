@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       environment-overlay: staging
-      cluster-name: "<% .Name %>"
+      cluster-name: "<% .Name %>-eks-cluster"
     steps:
       - uses: actions/checkout@v2
       - name: Set IMAGE_TAG as env
